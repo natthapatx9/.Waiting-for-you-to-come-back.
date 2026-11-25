@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>รอเทอกลับมาอยู่นะ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@200;300;400&family=Mali:ital,wght@1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --night: #0e1a24;
+  --deep: #070f16;
+  --moon: #ebe7de;
+  --mist: #8a9ba6;
+  --lamp: #f0bd86;
+  --pill: rgba(0,0,0,.32);
+  --serif: "Noto Serif Thai", "Sarabun", Georgia, serif;
+  --hand: "Mali", "Noto Serif Thai", cursive, serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--night);
+  color: var(--moon);
+  font-family: var(--serif);
+  font-weight: 300;
+  overflow-x: hidden;
+}
+
+
+main {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 12vh 7vw 27vh;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0;
+  font-weight: 200;
+  font-size: clamp(1.9rem, 8.6vw, 6rem);
+  text-wrap: balance;
+  line-height: 1.25;
+  letter-spacing: .01em;
+}
+.since {
+  margin: 1.2rem 0 0;
+  color: var(--mist);
+  font-size: clamp(.95rem, 2.6vw, 1.1rem);
+  line-height: 1.8;
+}
+
+.clock {
+  margin: clamp(3rem, 9vh, 5.5rem) 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .4rem clamp(1.2rem, 3.5vw, 2.6rem);
+}
+.unit { display: flex; align-items: baseline; gap: .55rem; }
+.unit b {
+  font-weight: 200;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(2.6rem, 11vw, 6rem);
+  line-height: 1.1;
+  min-width: 1.2ch;
+  text-align: right;
+}
+.unit span { color: var(--mist); font-size: clamp(.95rem, 2.8vw, 1.2rem); }
+.unit.sec b { color: var(--lamp); }
+
+.total {
+  margin: 1.6rem 0 0;
+  color: var(--mist);
+  font-size: clamp(.9rem, 2.5vw, 1rem);
+  line-height: 1.9;
+  font-variant-numeric: tabular-nums;
+}
+.total em { font-style: normal; color: var(--moon); }
+
+.note {
+  margin: clamp(3rem, 9vh, 5rem) 0 0;
+  max-width: 22rem;
+  font-family: var(--hand);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(1.05rem, 3.2vw, 1.3rem);
+  line-height: 1.9;
+  color: var(--lamp);
+  transform: rotate(-1.5deg);
+  transform-origin: left center;
+  min-height: 3.8em;
+}
+
+
+/* five skies, crossfaded */
+.sky { position: fixed; inset: 0; opacity: 0; transition: opacity 2.6s ease; }
+.sky.dawn { background: radial-gradient(ellipse 90% 40% at 32% 90%, rgba(255,190,140,.65), transparent 70%), radial-gradient(ellipse 60% 30% at 80% 10%, rgba(255,255,255,.25), transparent 70%), linear-gradient(180deg, #8fb9e3 0%, #e9d3cf 52%, #ffe3bd 100%); }
+.sky.noon { background: radial-gradient(ellipse 70% 40% at 50% 0%, rgba(255,255,255,.22), transparent 70%), linear-gradient(180deg, #3b8bd9 0%, #7bbdee 55%, #d6edff 100%); }
+.sky.evening { background: radial-gradient(ellipse 80% 38% at 68% 88%, rgba(255,176,90,.6), transparent 72%), linear-gradient(180deg, #262456 0%, #7d417a 45%, #d9704f 80%, #e58a5a 100%); }
+.sky.dusk { background: radial-gradient(ellipse 90% 35% at 50% 100%, rgba(214,104,120,.4), transparent 72%), linear-gradient(180deg, #0f1233 0%, #2d2559 50%, #6a4573 85%, #a65f72 100%); }
+.sky.night { background: radial-gradient(ellipse 50% 40% at 80% 8%, rgba(90,120,170,.16), transparent 70%), linear-gradient(180deg, #070f16 0%, #0e1a24 70%, #14232e 100%); }
+:root[data-phase="dawn"] .sky.dawn,
+:root[data-phase="noon"] .sky.noon,
+:root[data-phase="evening"] .sky.evening,
+:root[data-phase="dusk"] .sky.dusk,
+:root[data-phase="night"] .sky.night,
+:root:not([data-phase]) .sky.night { opacity: 1; }
+
+/* ink colours follow the sky */
+:root[data-phase="dawn"]    { --moon: #2b2740; --mist: #5f5778; --lamp: #c44f6a; --pill: rgba(255,255,255,.5); }
+:root[data-phase="noon"]    { --moon: #0f2c4a; --mist: #1f4565; --lamp: #d9730d; --pill: rgba(255,255,255,.45); }
+:root[data-phase="evening"] { --moon: #fff1e0; --mist: #ffe4cf; --lamp: #ffe08a; --pill: rgba(40,18,50,.38); }
+:root[data-phase="dusk"]    { --moon: #f0eaf6; --mist: #b3a9cc; --lamp: #f6bda4; --pill: rgba(8,8,30,.4); }
+:root[data-phase="evening"] main { text-shadow: 0 1px 14px rgba(40,20,50,.35); }
+h1, .since, .unit b, .unit span, .total, .total em { transition: color 2.4s ease; }
+
+.tools { margin-top: clamp(2rem, 6vh, 3.5rem); display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1.6rem; }
+.phases { display: flex; flex-wrap: wrap; gap: .3rem; }
+.tools button {
+  font: inherit; font-size: .9rem; color: var(--mist); background: var(--pill); cursor: pointer; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  border: 1px solid color-mix(in srgb, var(--mist) 45%, transparent);
+  border-radius: 999px; padding: .5rem 1.05rem; margin: 0; align-self: auto;
+  transition: color 1s ease, border-color 1s ease, background-color 1s ease;
+}
+.tools .ph { font-size: .78rem; padding: .34rem .62rem; }
+.tools button[aria-pressed="true"] { color: var(--lamp); border-color: var(--lamp); background: color-mix(in srgb, var(--lamp) 16%, var(--pill)); }
+.tools button:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; }
+body::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 2; opacity: .1; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.unit.sec b { display: inline-block; }
+.flip { animation: tickin .45s ease-out; }
+@keyframes tickin { from { transform: translateY(.14em); opacity: .3; } to { transform: none; opacity: 1; } }
+main { z-index: 1; }
+#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.note { transition: opacity 1.3s ease, color 2.4s ease; }
+.note.out { opacity: 0; }
+
+.sound {
+  margin: clamp(2rem, 6vh, 3.5rem) 0 0;
+  align-self: flex-start;
+  font: inherit;
+  font-size: .95rem;
+  color: var(--mist);
+  background: transparent;
+  border: 1px solid rgba(138,155,166,.35);
+  border-radius: 999px;
+  padding: .6rem 1.2rem;
+  cursor: pointer;
+  transition: color .3s, border-color .3s, background .3s;
+}
+.sound:hover { color: var(--moon); border-color: var(--mist); }
+.sound[aria-pressed="true"] { color: var(--lamp); border-color: rgba(240,189,134,.6); background: rgba(240,189,134,.07); }
+.sound:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sky { transition: none; }
+  .flip { animation: none; }
+  .note { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="sky dawn" aria-hidden="true"></div>
+<div class="sky noon" aria-hidden="true"></div>
+<div class="sky evening" aria-hidden="true"></div>
+<div class="sky dusk" aria-hidden="true"></div>
+<div class="sky night" aria-hidden="true"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<main>
+  <h1>รอเทอกลับมาอยู่นะ</h1>
+  <p class="since">ตั้งแต่เที่ยงคืนวันที่ 25 พฤศจิกายน 2569</p>
+
+  <div class="clock" role="timer" aria-label="เวลาที่รอมา">
+    <div class="unit"><b id="d">0</b><span>วัน</span></div>
+    <div class="unit"><b id="h">00</b><span>ชั่วโมง</span></div>
+    <div class="unit"><b id="m">00</b><span>นาที</span></div>
+    <div class="unit sec"><b id="s">00</b><span>วินาที</span></div>
+  </div>
+
+  <p class="total" id="total"></p>
+  <p class="note" id="note"></p>
+  <div class="tools">
+    <button class="sound" id="sound" type="button" aria-pressed="false">เปิดเสียงนาฬิกา</button>
+    <div class="phases" role="group" aria-label="ช่วงเวลาของวัน">
+      <button class="ph" data-ph="auto" type="button" aria-pressed="true">ตามเวลา</button>
+      <button class="ph" data-ph="dawn" type="button" aria-pressed="false">เช้า</button>
+      <button class="ph" data-ph="noon" type="button" aria-pressed="false">เที่ยง</button>
+      <button class="ph" data-ph="evening" type="button" aria-pressed="false">เย็น</button>
+      <button class="ph" data-ph="dusk" type="button" aria-pressed="false">ค่ำ</button>
+      <button class="ph" data-ph="night" type="button" aria-pressed="false">ดึก</button>
+    </div>
+  </div>
+</main>
+
+<script>
+(function () {
+  var START = new Date("2026-11-25T00:00:00+07:00").getTime();
+  var notes = [
+    "ไม่ต้องรีบนะ ค่อยๆ มาก็ได้",
+    "ไม่ต้องรีบเลย เดี๋ยวรอได้",
+    "ไม่ต้องรีบ ถนนมันลื่น ขับช้าๆ ก็ได้",
+    "ไม่ต้องรีบนะ ไว้พร้อมแล้วค่อยกลับ",
+    "ไม่ต้องรีบ รออยู่ตรงนี้เสมอ",
+    "ไม่ต้องรีบหรอก แต่ถ้ามาได้ก็ดีใจ",
+    "ไม่ต้องรีบนะ พักให้หายเหนื่อยก่อน",
+    "ไม่ต้องรีบ ใจเย็นๆ เดี๋ยวก็ถึง",
+    "ไม่ต้องรีบ ไม่ว่าจะนานแค่ไหนก็รอ",
+    "ไม่ต้องรีบนะ ทางกลับบ้านยังอยู่ที่เดิม",
+    "ไฟหน้าบ้านยังเปิดไว้อยู่",
+    "ถ้าฝนตก ก็หลบก่อนแล้วค่อยกลับ",
+    "ข้าวยังอุ่นไว้ให้เสมอ",
+    "วันนี้ก็คิดถึงเหมือนเดิม",
+    "เดินทางดีๆ นะ",
+    "หมอนข้างเทอยังวางที่เดิม",
+    "ชงชาไว้แล้ว เผื่อเทอมาถึงตอนเย็น",
+    "ถึงช้าก็ไม่เป็นไร ขอแค่กลับมา",
+    "ประตูไม่ได้ล็อกนะ",
+    "ดาวคืนนี้สวยดี เสียดายไม่ได้ดูด้วยกัน",
+    "กินข้าวหรือยัง อย่าลืมกินนะ",
+    "คิดถึงนะ บอกไว้เฉยๆ",
+    "เมื่อไหร่ก็ได้ที่เทอพร้อม",
+    "เสียงนาฬิกาเดินอยู่ แต่ใจไม่ได้เร่งเลย",
+    "ไม่ต้องรีบ ระหว่างทางถ้าเจอพระจันทร์สวยๆ ก็แวะดูได้",
+    "ไม่ต้องรีบ เก้าอี้ตัวข้างๆ ยังว่างไว้ให้",
+    "ผ้าห่มผืนเดิมยังอยู่ที่เดิมนะ",
+    "ถ้าเหนื่อยก็แวะพัก แล้วค่อยกลับมาหากัน",
+    "เปิดเพลงที่เทอชอบคลอไปเบาๆ ระหว่างรอ",
+    "ไม่ต้องรีบ ใครรอก็รอได้ ถ้าคนนั้นคือเทอ",
+    "คืนนี้ลมเย็นดี อยากให้เทออยู่ตรงนี้",
+    "ไม่ว่าเทอจะกลับมาตอนไหน ก็ยินดีเสมอ",
+    "นับไปเรื่อยๆ นะ จนกว่าจะได้เจอกัน",
+    "ไม่ต้องรีบ ขอแค่กลับมาอย่างปลอดภัย"
+  ];
+  var el = function (id) { return document.getElementById(id); };
+  var pad = function (n) { return n < 10 ? "0" + n : "" + n; };
+  var fmt = function (n) { return n.toLocaleString("th-TH"); };
+  var lastNote = -1;
+
+  function tick() {
+    var diff = Math.max(0, Date.now() - START);
+    var secs = Math.floor(diff / 1000);
+    var d = Math.floor(secs / 86400);
+    var h = Math.floor((secs % 86400) / 3600);
+    var m = Math.floor((secs % 3600) / 60);
+    var s = secs % 60;
+
+    el("d").textContent = d;
+    el("h").textContent = pad(h);
+    el("m").textContent = pad(m);
+    var se = el("s");
+    if (se.textContent !== pad(s)) { se.textContent = pad(s); se.classList.remove("flip"); void se.offsetWidth; se.classList.add("flip"); }
+
+    var totalH = Math.floor(secs / 3600);
+    el("total").innerHTML =
+      "วันนี้เป็นวันที่ <em>" + fmt(d + 1) + "</em> ของการรอ<br>รวมแล้ว <em>" + fmt(totalH) + "</em> ชั่วโมง หรือ <em>" + fmt(secs) + "</em> วินาที";
+
+    playTick(s);
+    updatePhase();
+    document.title = "รอมา " + d + " วัน " + pad(h) + ":" + pad(m) + ":" + pad(s);
+  }
+
+  /* ---------- clock sound (needs a tap to unlock audio) ---------- */
+  var AC = window.AudioContext || window.webkitAudioContext;
+  var ctx = null, soundOn = false;
+  function playTick(sec) {
+    if (!soundOn || !ctx) return;
+    var t = ctx.currentTime;
+    var len = Math.floor(ctx.sampleRate * 0.035);
+    var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    var data = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 6);
+    var src = ctx.createBufferSource(); src.buffer = buf;
+    var f = ctx.createBiquadFilter(); f.type = "bandpass";
+    f.frequency.value = sec % 2 ? 1700 : 2300; f.Q.value = 3;
+    var g = ctx.createGain(); g.gain.value = 0.8;
+    src.connect(f); f.connect(g); g.connect(ctx.destination); src.start(t);
+    var o = ctx.createOscillator(), og = ctx.createGain();
+    o.type = "sine"; o.frequency.value = sec % 2 ? 620 : 820;
+    og.gain.setValueAtTime(0.18, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
+    o.connect(og); og.connect(ctx.destination); o.start(t); o.stop(t + 0.08);
+  }
+  var btn = el("sound");
+  btn.addEventListener("click", function () {
+    try {
+      if (!ctx && AC) ctx = new AC();
+      if (ctx && ctx.state === "suspended") ctx.resume();
+    } catch (e) { return; }
+    soundOn = !soundOn;
+    btn.setAttribute("aria-pressed", soundOn ? "true" : "false");
+    btn.textContent = soundOn ? "ปิดเสียงนาฬิกา" : "เปิดเสียงนาฬิกา";
+    if (soundOn) playTick(new Date().getSeconds());
+  });
+
+  /* ---------- notes: some for the hour, some for always ---------- */
+  var phaseNotes = {
+    dawn: ["อรุณสวัสดิ์ วันนี้ก็ยังรออยู่นะ", "ฟ้าเริ่มสว่างแล้ว ตื่นมาแล้วนะ", "กาแฟแก้วแรกของวัน ยังคิดถึงเทอเหมือนเดิม", "นกเริ่มร้องแล้ว เช้านี้อากาศดีนะ", "ไม่ต้องรีบ เช้านี้ยังอีกยาว"],
+    noon: ["แดดแรงนะ อย่าลืมดื่มน้ำ", "กินข้าวเที่ยงหรือยัง", "เที่ยงแล้ว ถ้าร้อนก็หาที่ร่มก่อนนะ", "ไม่ต้องรีบ พักกลางวันก่อนก็ได้", "ท้องฟ้าใสมาก อยากให้เทอเห็น"],
+    evening: ["เย็นแล้ว ฟ้าสวยจัง อยากดูด้วยกัน", "ใกล้ถึงเวลากลับบ้านแล้วนะ", "ลมเริ่มเย็นแล้ว กลับมาตอนนี้พอดีเลย", "ไม่ต้องรีบ ให้ตะวันตกดินก่อนก็ได้", "เดินทางกลับดีๆ นะ"],
+    dusk: ["ไฟหน้าบ้านเปิดแล้วนะ", "ค่ำแล้ว ดาวดวงแรกขึ้นแล้ว", "มื้อเย็นยังอุ่นอยู่ มาเมื่อไหร่ก็กินได้", "ไม่ต้องรีบ ค่ำนี้ยังไม่ดึก", "ฟ้าเปลี่ยนสีแล้ว คิดถึงนะ"],
+    night: ["ดึกแล้ว อย่านอนดึกนะ", "ดาวเต็มฟ้าเลยคืนนี้", "ไม่ต้องรีบ ฝันดีไว้ก่อนก็ได้", "คืนนี้เงียบดี มีแต่เสียงนาฬิกา", "ถ้าตื่นมาแล้วไฟยังเปิดอยู่ แปลว่ายังรออยู่"]
+  };
+  var lastText = "";
+  function pick(force) {
+    var src = (force || Math.random() < .55) ? phaseNotes[phase] : notes, t, n = 0;
+    do { t = src[Math.floor(Math.random() * src.length)]; n++; } while (t === lastText && n < 10);
+    lastText = t; return t;
+  }
+  function nextNote(first, force) {
+    var n = el("note"), text = pick(force);
+    if (first) { n.textContent = text; return; }
+    n.classList.add("out");
+    setTimeout(function () { n.textContent = text; n.classList.remove("out"); }, 1300);
+  }
+
+  /* ---------- sky: five times of day ---------- */
+  var HOUR = { dawn: 7.5, noon: 12.5, evening: 17.4, dusk: 19.3, night: 0.5 };
+  var T = {
+    dawn:    { stars: .08, fly: .5,  cloud: .8,  birds: .9, lamp: 0,   mist: .8, rays: .55, f: [255,244,225], c: [255,238,232], b: [84,72,96],
+               hz: [242,214,204], dk: [86,78,112],  sl: [255,228,214] },
+    noon:    { stars: 0,   fly: .3,  cloud: 1,   birds: 0,  lamp: 0,   mist: 0,  rays: .12, f: [255,255,255], c: [255,255,255], b: [60,60,80],
+               hz: [204,230,250], dk: [38,86,100],  sl: [255,255,255] },
+    evening: { stars: .05, fly: .6,  cloud: .7,  birds: .9, lamp: .35, mist: 0,  rays: .6,  f: [255,200,140], c: [255,168,140], b: [52,30,56],
+               hz: [238,144,100], dk: [44,26,64],   sl: [255,176,120] },
+    dusk:    { stars: .65, fly: .85, cloud: .15, birds: 0,  lamp: .7,  mist: 0,  rays: 0,   f: [255,205,160], c: [130,105,160], b: [40,30,60],
+               hz: [150,92,130],  dk: [16,18,48],   sl: [196,150,190] },
+    night:   { stars: 1,   fly: 1,   cloud: 0,   birds: 0,  lamp: 1,   mist: 0,  rays: 0,   f: [240,189,134], c: [90,100,130], b: [40,40,60],
+               hz: [26,44,58],    dk: [5,12,19],    sl: [120,142,172] }
+  };
+  var pinned = null, phase = "night", curH = 0, cur = null;
+  var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function phaseOf(h) {
+    if (h >= 5 && h < 10) return "dawn";
+    if (h >= 10 && h < 15.5) return "noon";
+    if (h >= 15.5 && h < 18.5) return "evening";
+    if (h >= 18.5 && h < 20.5) return "dusk";
+    return "night";
+  }
+  function hourNow() { var d = new Date(); return d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600; }
+  function targetHour() { return pinned ? HOUR[pinned] : hourNow(); }
+  function snap(k) {
+    var t = T[k], o = { stars: t.stars, fly: t.fly, cloud: t.cloud, birds: t.birds, lamp: t.lamp, mist: t.mist, rays: t.rays };
+    ["f", "c", "b", "hz", "dk", "sl"].forEach(function (key) { o[key] = t[key].slice(); });
+    return o;
+  }
+  var phBtns = document.querySelectorAll(".ph");
+  function syncButtons() {
+    Array.prototype.forEach.call(phBtns, function (b) {
+      var k = b.getAttribute("data-ph");
+      b.setAttribute("aria-pressed", String(k === "auto" ? !pinned : pinned === k));
+    });
+  }
+  function updatePhase() {
+    var h = targetHour(), p = pinned || phaseOf(h);
+    if (cur && p === phase) return;
+    var first = !cur;
+    phase = p;
+    document.documentElement.setAttribute("data-phase", p);
+    if (first || still) { cur = snap(p); curH = h; }
+    syncButtons();
+    if (!first) nextNote(false, true);
+    if (still && !first) requestAnimationFrame(frame);
+  }
+  Array.prototype.forEach.call(phBtns, function (b) {
+    b.addEventListener("click", function () {
+      var k = b.getAttribute("data-ph");
+      pinned = k === "auto" ? null : k;
+      updatePhase(); syncButtons();
+      if (still) { cur = snap(phase); curH = targetHour(); requestAnimationFrame(frame); }
+    });
+  });
+
+  var cv = el("fx"), c = cv.getContext("2d");
+  var W = 0, H = 0, stars = [], flies = [], clouds = [], birds = [], shoot = null, nextShoot = 4, sparks = [], moon = null, moonR = 20;
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+  function rgba(k, a) { return "rgba(" + Math.round(k[0]) + "," + Math.round(k[1]) + "," + Math.round(k[2]) + "," + a.toFixed(3) + ")"; }
+  function mkMoon(r) {
+    var n = Math.ceil(r * 2 + 4), s2 = document.createElement("canvas");
+    s2.width = s2.height = n;
+    var g = s2.getContext("2d");
+    g.fillStyle = "#f1ede2"; g.beginPath(); g.arc(n / 2, n / 2, r, 0, 6.2832); g.fill();
+    g.globalCompositeOperation = "destination-out";
+    g.beginPath(); g.arc(n / 2 + r * .55, n / 2 - r * .25, r * .92, 0, 6.2832); g.fill();
+    return s2;
+  }
+  function setup() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    stars = []; flies = []; clouds = []; birds = [];
+    var i, ns = Math.round(W * H / 8000);
+    for (i = 0; i < ns; i++) stars.push({ x: rnd(0, W), y: rnd(0, H * .75), r: rnd(.4, 1.3), ph: rnd(0, 6.28), sp: rnd(.6, 1.8) });
+    var nf = W < 600 ? 14 : 24;
+    for (i = 0; i < nf; i++) flies.push({ x: rnd(0, W), y: rnd(H * .35, H), a: rnd(0, 6.28), v: rnd(.12, .35), ph: rnd(0, 6.28), sp: rnd(.5, 1.2), r: rnd(2, 4.2) });
+    for (i = 0; i < 6; i++) clouds.push({ x: rnd(-W * .2, W), y: rnd(H * .08, H * .5), w: rnd(W * .3, W * .55), v: rnd(.08, .24) });
+    for (i = 0; i < 5; i++) birds.push({ x: rnd(-W * .2, W), y: rnd(H * .12, H * .4), v: rnd(.35, .7), s: rnd(5, 9), ph: rnd(0, 6) });
+    moonR = Math.max(18, Math.min(W, H) * .045);
+    moon = mkMoon(moonR);
+    rid = ML.map(genRidge);
+  }
+  function cloudAt(x, y, w, a, col) {
+    for (var i = 0; i < 5; i++) {
+      var px = x + (i - 2) * w * .18, py = y + Math.sin(i * 1.7) * w * .03, r = w * (.16 + .05 * Math.cos(i * 1.3));
+      var g = c.createRadialGradient(px, py, 0, px, py, r);
+      g.addColorStop(0, rgba(col, a * .55)); g.addColorStop(1, rgba(col, 0));
+      c.fillStyle = g; c.beginPath(); c.arc(px, py, r, 0, 6.2832); c.fill();
+    }
+  }
+  /* mountains: four ridgelines from midpoint displacement, hazier the farther they sit */
+  var ML = [{ b: .78, h: .15, r: .6, seed: 7, t: .15 }, { b: .835, h: .14, r: .57, seed: 23, t: .4 }, { b: .895, h: .12, r: .55, seed: 41, t: .68 }, { b: .965, h: .1, r: .5, seed: 59, t: 1 }];
+  var RN = 512, rid = [];
+  function genRidge(q) {
+    var a = new Float32Array(RN + 1), rs = q.seed * 9973 + 1, amp = 1, step = RN, i, mn = 9, mx = -9;
+    function r() { rs = (rs * 16807) % 2147483647; return rs / 2147483647; }
+    a[0] = r(); a[RN] = r();
+    while (step > 1) {
+      var half = step / 2;
+      for (i = half; i < RN; i += step) a[i] = (a[i - half] + a[i + half]) / 2 + (r() - .5) * amp;
+      amp *= q.r; step = half;
+    }
+    for (i = 0; i <= RN; i++) { if (a[i] < mn) mn = a[i]; if (a[i] > mx) mx = a[i]; }
+    for (i = 0; i <= RN; i++) a[i] = (a[i] - mn) / (mx - mn);
+    return a;
+  }
+  function mixc(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+  function ridgeVal(l, x) {
+    var u = Math.max(0, Math.min(RN - .001, x / W * RN)), i = Math.floor(u), f = u - i, a = rid[l];
+    return a[i] + (a[i + 1] - a[i]) * f;
+  }
+  function mountain(l) {
+    var q = ML[l], col = mixc(cur.hz, cur.dk, q.t), base = H * q.b, x, minY = H, ys = [];
+    for (x = 0; x <= W + 3; x += 3) { var y = base - H * q.h * ridgeVal(l, x); ys.push(y); if (y < minY) minY = y; }
+    var g = c.createLinearGradient(0, minY, 0, base + H * .05);
+    g.addColorStop(0, rgba(mixc(col, cur.sl, .6 * (1 - q.t * .7)), 1));
+    g.addColorStop(.28, rgba(col, 1));
+    g.addColorStop(1, rgba(mixc(col, cur.hz, .4 * (1 - q.t)), 1));
+    c.fillStyle = g; c.beginPath(); c.moveTo(0, H + 2);
+    for (x = 0; x < ys.length; x++) c.lineTo(x * 3, ys[x]);
+    c.lineTo(W + 3, H + 2); c.closePath(); c.fill();
+    c.strokeStyle = rgba(cur.sl, .2 * (1 - q.t * .6)); c.lineWidth = 1; c.beginPath();
+    for (x = 0; x < ys.length; x++) { if (x) c.lineTo(x * 3, ys[x]); else c.moveTo(0, ys[0]); }
+    c.stroke();
+    if (l < 3) {
+      var fg = c.createLinearGradient(0, base - H * .08, 0, base + H * .03);
+      fg.addColorStop(0, rgba(cur.hz, 0)); fg.addColorStop(1, rgba(cur.hz, .5 * (1 - q.t * .5)));
+      c.fillStyle = fg; c.fillRect(0, base - H * .08, W, H * .11 + 2);
+    }
+  }
+  function scene() { for (var l = 0; l < ML.length; l++) mountain(l); }
+  function frame(ms) {
+    var t = ms / 1000, i, k;
+    if (!still && cur) {
+      var tg = T[phase], e = .025;
+      ["stars", "fly", "cloud", "birds", "lamp", "mist", "rays"].forEach(function (key) { cur[key] += (tg[key] - cur[key]) * e; });
+      ["f", "c", "b", "hz", "dk", "sl"].forEach(function (key) { for (var q = 0; q < 3; q++) cur[key][q] += (tg[key][q] - cur[key][q]) * e; });
+      var dh = ((targetHour() - curH + 36) % 24) - 12;
+      curH = (curH + (Math.abs(dh) < .002 ? dh : dh * .03) + 24) % 24;
+    }
+    c.clearRect(0, 0, W, H);
+    if (!cur) { if (!still) requestAnimationFrame(frame); return; }
+
+    for (i = 0; i < stars.length; i++) {
+      var st = stars[i];
+      var sa = cur.stars * (still ? .35 : .15 + .55 * (0.5 + 0.5 * Math.sin(t * st.sp + st.ph)));
+      if (sa < .01) continue;
+      c.fillStyle = "rgba(235,231,222," + sa.toFixed(3) + ")";
+      c.beginPath(); c.arc(st.x, st.y, st.r, 0, 6.2832); c.fill();
+    }
+
+    /* sun by day, moon by night, riding one arc */
+    var h = curH, day = h >= 5.5 && h < 18.5;
+    var tt = day ? (h - 5.5) / 13 : (h >= 18.5 ? h - 18.5 : h + 5.5) / 11;
+    var alt = Math.sin(Math.PI * tt), bx = W * (.22 + .66 * tt), by = H * .84 - alt * H * .6;
+    var ba = Math.min(1, alt * 12), U = Math.min(W, H);
+    if (ba > .01) {
+      if (day) {
+        var col = [255, 150 + 95 * Math.sqrt(alt), 80 + 120 * alt];
+        var sg = c.createRadialGradient(bx, by, 0, bx, by, U * .42);
+        sg.addColorStop(0, rgba(col, .75 * ba)); sg.addColorStop(.25, rgba(col, .22 * ba)); sg.addColorStop(1, rgba(col, 0));
+        c.fillStyle = sg; c.beginPath(); c.arc(bx, by, U * .42, 0, 6.2832); c.fill();
+        if (cur.rays > .01) {
+          var rl = Math.max(W, H) * 1.1;
+          for (var rI = 0; rI < 9; rI++) {
+            var ang = -Math.PI + (rI + .5) * (Math.PI / 9) + (still ? 0 : Math.sin(t * .15 + rI) * .04), rw = .045;
+            var rg = c.createLinearGradient(bx, by, bx + Math.cos(ang) * rl, by + Math.sin(ang) * rl);
+            rg.addColorStop(0, rgba(col, .2 * ba * cur.rays)); rg.addColorStop(1, rgba(col, 0));
+            c.fillStyle = rg; c.beginPath(); c.moveTo(bx, by);
+            c.lineTo(bx + Math.cos(ang - rw) * rl, by + Math.sin(ang - rw) * rl);
+            c.lineTo(bx + Math.cos(ang + rw) * rl, by + Math.sin(ang + rw) * rl);
+            c.closePath(); c.fill();
+          }
+        }
+        c.fillStyle = rgba([255, 250, 235], .95 * ba); c.beginPath(); c.arc(bx, by, U * .04, 0, 6.2832); c.fill();
+      } else {
+        var mg = c.createRadialGradient(bx, by, 0, bx, by, U * .22);
+        mg.addColorStop(0, "rgba(235,231,222," + (.2 * ba).toFixed(3) + ")"); mg.addColorStop(1, "rgba(235,231,222,0)");
+        c.fillStyle = mg; c.beginPath(); c.arc(bx, by, U * .22, 0, 6.2832); c.fill();
+        c.globalAlpha = ba; c.drawImage(moon, bx - moon.width / 2, by - moon.height / 2); c.globalAlpha = 1;
+      }
+    }
+
+    if (cur.cloud > .02) {
+      for (i = 0; i < clouds.length; i++) {
+        var cl = clouds[i];
+        if (!still) { cl.x += cl.v; if (cl.x - cl.w * .6 > W) cl.x = -cl.w * .6; }
+        cloudAt(cl.x, cl.y, cl.w, cur.cloud, cur.c);
+      }
+    }
+
+    scene();
+    var br = .75 + .25 * Math.sin(t * .9), R = Math.max(W, H);
+    if (cur.lamp > .01) {
+      var lg = c.createRadialGradient(W / 2, H * 1.02, 0, W / 2, H * 1.02, R * .75);
+      lg.addColorStop(0, "rgba(240,189,134," + (.34 * cur.lamp * (still ? .8 : br)).toFixed(3) + ")"); lg.addColorStop(1, "rgba(240,189,134,0)");
+      c.fillStyle = lg; c.fillRect(0, 0, W, H);
+    }
+    if (cur.mist > .01) {
+      var mi = c.createRadialGradient(W / 2, H * 1.02, 0, W / 2, H * 1.02, R * .7);
+      mi.addColorStop(0, "rgba(255,255,255," + (.45 * cur.mist).toFixed(3) + ")"); mi.addColorStop(1, "rgba(255,255,255,0)");
+      c.fillStyle = mi; c.fillRect(0, 0, W, H);
+    }
+
+    if (cur.birds > .02) {
+      c.strokeStyle = rgba(cur.b, .75 * cur.birds); c.lineWidth = 1.4; c.lineCap = "round";
+      for (i = 0; i < birds.length; i++) {
+        var b = birds[i];
+        if (!still) { b.x += b.v; if (b.x > W + 30) { b.x = -30; b.y = rnd(H * .12, H * .4); } }
+        var fl = still ? .4 : Math.sin(t * 5 + b.ph) * .6, by2 = b.y + (still ? 0 : Math.sin(t * .8 + b.ph) * 6);
+        c.beginPath(); c.moveTo(b.x - b.s, by2); c.quadraticCurveTo(b.x - b.s / 2, by2 - b.s * fl - 2, b.x, by2);
+        c.quadraticCurveTo(b.x + b.s / 2, by2 - b.s * fl - 2, b.x + b.s, by2); c.stroke();
+      }
+    }
+
+    for (i = 0; i < flies.length; i++) {
+      var f = flies[i];
+      if (!still) {
+        f.a += Math.sin(t * .4 + f.ph) * .03;
+        f.x += Math.cos(f.a) * f.v; f.y += Math.sin(f.a) * f.v - .06;
+        if (f.x < -20) f.x = W + 20; if (f.x > W + 20) f.x = -20;
+        if (f.y < H * .25) { f.y = H + 10; f.x = rnd(0, W); }
+      }
+      var glow = (still ? .6 : .25 + .75 * Math.pow(0.5 + 0.5 * Math.sin(t * f.sp + f.ph), 2)) * cur.fly;
+      var rr = f.r * 6, gr = c.createRadialGradient(f.x, f.y, 0, f.x, f.y, rr);
+      gr.addColorStop(0, rgba(cur.f, glow * .85)); gr.addColorStop(.35, rgba(cur.f, glow * .2)); gr.addColorStop(1, rgba(cur.f, 0));
+      c.fillStyle = gr; c.beginPath(); c.arc(f.x, f.y, rr, 0, 6.2832); c.fill();
+      c.fillStyle = rgba([255, 240, 215], Math.min(1, glow + .1 * cur.fly)); c.beginPath(); c.arc(f.x, f.y, f.r * .35, 0, 6.2832); c.fill();
+    }
+
+    if (!still) {
+      for (k = sparks.length - 1; k >= 0; k--) {
+        var p = sparks[k];
+        p.x += p.vx; p.y += p.vy; p.vx *= .97; p.vy = p.vy * .97 + .015; p.life -= .014;
+        if (p.life <= 0) { sparks.splice(k, 1); continue; }
+        c.fillStyle = "rgba(255,190,100," + p.life.toFixed(3) + ")";
+        c.beginPath(); c.arc(p.x, p.y, p.r * p.life + .4, 0, 6.2832); c.fill();
+      }
+      if (!shoot && cur.stars > .5 && t > nextShoot) {
+        shoot = { x: rnd(W * .4, W), y: rnd(0, H * .25), vx: -rnd(7, 10), vy: rnd(3, 5), life: 1 };
+        nextShoot = t + rnd(9, 18);
+      }
+      if (shoot) {
+        var tx = shoot.x - shoot.vx * 9, ty = shoot.y - shoot.vy * 9;
+        var sl = c.createLinearGradient(shoot.x, shoot.y, tx, ty);
+        sl.addColorStop(0, "rgba(255,250,240," + shoot.life.toFixed(3) + ")"); sl.addColorStop(1, "rgba(255,250,240,0)");
+        c.strokeStyle = sl; c.lineWidth = 1.5; c.lineCap = "round";
+        c.beginPath(); c.moveTo(shoot.x, shoot.y); c.lineTo(tx, ty); c.stroke();
+        shoot.x += shoot.vx; shoot.y += shoot.vy; shoot.life -= .012;
+        if (shoot.life <= 0) shoot = null;
+      }
+      requestAnimationFrame(frame);
+    }
+  }
+  window.addEventListener("pointerdown", function (e) {
+    if (still || (e.target.closest && e.target.closest("button"))) return;
+    for (var i = 0; i < 16; i++) {
+      var a = rnd(0, 6.2832), v = rnd(.6, 2.6);
+      sparks.push({ x: e.clientX, y: e.clientY, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: rnd(1.5, 3), life: 1 });
+    }
+  });
+  window.addEventListener("resize", function () { setup(); if (still) requestAnimationFrame(frame); });
+  setup();
+  updatePhase();
+  nextNote(true);
+  setInterval(function () { nextNote(false); }, 7500);
+  requestAnimationFrame(frame);
+
+  /* ---------- start the clock on the whole second ---------- */
+  tick();
+  (function loop() {
+    setTimeout(function () { tick(); loop(); }, 1000 - (Date.now() % 1000));
+  })();
+})();
+</script>
+</body>
+</html>
